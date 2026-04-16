@@ -7,8 +7,8 @@ def normalize(text):
 def find_matches(small_list, big_list, porog=3):
     exact_matches = []
     other_matches = []
-
     iterations = 0
+
 
     normalized_big = [
         {"id": item["id"], "name": normalize(item["name"])}
@@ -31,15 +31,16 @@ def find_matches(small_list, big_list, porog=3):
         variants = []
 
         for big_item in normalized_big:
-            distance = Levenshtein.distance(small_name, big_item["name"])
-            iterations += 1
+            if abs(len(small_name) - len(big_item["name"]) <= porog):
+                distance = Levenshtein.distance(small_name, big_item["name"])
+                iterations += 1
 
-            if distance <= porog:
-                variants.append({
-                        "ID в базе данных": big_item["id"],
-                        "Название": big_item["name"],
-                        "Разница": distance
-                    })
+                if distance <= porog:
+                    variants.append({
+                            "ID в базе данных": big_item["id"],
+                            "Название": big_item["name"],
+                            "Разница": distance
+                        })
 
         if variants:
                 other_matches.append({
@@ -49,29 +50,8 @@ def find_matches(small_list, big_list, porog=3):
 
     return exact_matches, other_matches, iterations
 
-small_list = [
-    {"id": 1, "name": "iphone 13"},
-    {"id": 2, "name": "iphone13"},
-    {"id": 3, "name": "iphne 13"},
-    {"id": 4, "name": "samsng galaxy"},
-    {"id": 5, "name": "Samsung Galaxy"},
-    {"id": 6, "name": "xiaomi redmi"},
-    {"id": 7, "name": "xiomi redmi"},
-    {"id": 8, "name": "nokia 3310"},
-    {"id": 9, "name": "  iPhone 13  "},
-    {"id": 10, "name": "SAMSUNG galaxy"},
-]
-
-big_list = [
-    {"id": 101, "name": "iPhone 13"},
-    {"id": 102, "name": "Samsung Galaxy"},
-    {"id": 103, "name": "Xiaomi Redmi"},
-    {"id": 104, "name": "Xiaomi Redmi Note"},
-    {"id": 105, "name": "Huawei P30"},
-    {"id": 106, "name": "iPhone 12"},
-    {"id": 107, "name": "Samsung Galaxy S21"},
-    {"id": 108, "name": "Nokia 3310 Classic"},
-]
+small_list = [ {"id": 1, "name": "iphone 13"}, {"id": 2, "name": "samsng galaxy"}, {"id": 3, "name": "samsung galaxy"}, ]
+big_list = [ {"id": 101, "name": "iPhone 13"}, {"id": 102, "name": "Samsung Galaxy"}, {"id": 103, "name": "Xiaomi Redmi"}, {'id': 104, 'name': 'Xiaomi Blue'}, ]
 
 start = time.perf_counter()
 exact, other, itr = find_matches(small_list, big_list)
@@ -86,3 +66,5 @@ print(*other, sep="\n")
 
 print(f"Время выполнения: {end - start:.6f} секунд")
 print(f'Количество итераций: {itr}')
+
+print(len(small_list), len(big_list))

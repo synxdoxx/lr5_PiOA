@@ -33,6 +33,7 @@ def find_matches(small_list, big_list, porog=3):
             variants = []
 
             for big_item in normalized_big:
+
                 distance = Levenshtein.distance(small_name, big_item["name"])
 
                 if distance <= porog:
