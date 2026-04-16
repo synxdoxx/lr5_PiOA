@@ -7,6 +7,7 @@ def normalize(text):
 def find_matches(small_list, big_list, porog=3):
     exact_matches = []
     other_matches = []
+
     iterations = 0
 
     normalized_big = [
@@ -14,35 +15,33 @@ def find_matches(small_list, big_list, porog=3):
         for item in big_list
     ]
 
+    big_dict = {normalize(item["name"]): item["id"] for item in big_list}
+
     for small_item in small_list:
         small_name = normalize(small_item["name"])
         found_exact = False
 
+        if small_name in big_dict:
+            exact_matches.append({
+                "Название": small_item["name"],
+                "ID в базе данных": big_dict[small_name]
+            })
+            continue
+
+        variants = []
 
         for big_item in normalized_big:
+            distance = Levenshtein.distance(small_name, big_item["name"])
             iterations += 1
-            if small_name == big_item["name"]:
-                exact_matches.append({
-                    "Название": small_item["name"],
-                    "ID в базе данных": big_item["id"]
-                })
-                found_exact = True
-                break
 
-        if not found_exact:
-            variants = []
-
-            for big_item in normalized_big:
-                distance = Levenshtein.distance(small_name, big_item["name"])
-
-                if distance <= porog:
-                    variants.append({
+            if distance <= porog:
+                variants.append({
                         "ID в базе данных": big_item["id"],
                         "Название": big_item["name"],
                         "Разница": distance
                     })
 
-            if variants:
+        if variants:
                 other_matches.append({
                     "Название": small_item["name"],
                     "Возможные варианты": sorted(variants, key=lambda x: x["Разница"])
@@ -73,6 +72,7 @@ big_list = [
     {"id": 107, "name": "Samsung Galaxy S21"},
     {"id": 108, "name": "Nokia 3310 Classic"},
 ]
+
 start = time.perf_counter()
 exact, other, itr = find_matches(small_list, big_list)
 end = time.perf_counter()
